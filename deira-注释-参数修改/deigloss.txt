@@ -1,0 +1,322 @@
+                        GLOSSARY FOR DEIRA
+
+Explanatory notes:
+-----------------------------------------------------------------------
+!PARAMETER  - must be specified in DEIRA; no default value in DEFVAL or
+              START;
+*PARAMETER  - can be changed in DEIRA; some default value is set in
+              either DEFVAL, or START, or PARAMETER statement;
+ PARAMETER  - must not be altered, has a strictly specific value;
+
+=======================================================================
+=======================================================================
+
+                        PARAMETER CONSTANTS:
+
+*NN        - maximum allowed number of mesh cells; must be even!
+*NNZ       - maximum allowed number of target layers (shells); must be
+             even!
+*FLOOR     - minimum positive number that we still distinguish from 0.0;
+             reasonable values may be 1.D-30 -> 1.D-100;
+
+=======================================================================
+=======================================================================
+
+                        CONTROL PARAMETERS:
+
+COMMON/PARUN/: parameters of a specific run:
+-----------------------------------------------------------------------
+*NRUN      - run number; default = 0;
+*NTPRI     - number of time steps after which to repeat the printout;
+             default = 10 000 000;
+*NJPRI     - only mesh cells with numbers NJPRI, 2*NJPRI,... are printed
+             default = 1;
+*NALPRI =1 -> print EAL, HIAL; =2 -> print EP3, HIP3;
+        =3 -> print EP14, HIP14; default = 1;
+*NTSAVE    - only time steps NTSAVE, 2*NTSAVE,...are saved in the
+             file DEISA3; default = 10 000 000;
+ NSAVE     - sequential number of the saving step;
+*N0000     - empty (spare) variable;
+*IFN14     - option flag for heating by 14-MeV neutrons; default = 0;
+*IFN2      - option flag for heating by 2.45-MeV neutrons; default =0;
+
+c......................................................................
+c <Neutron heating of the central fuel "sphere">:
+c IFN14(IFN2) = 0 -> ignored;
+c             = 1 -> 1-st scattering;
+c             = 2 -> local;
+c             = 3 -> spread uniformly;
+c             = 4 -> reserved for future;
+c             > 4 -> not allowed.
+c <Neutron heating of possible outer fuel layers>:
+c IFN14(IFN2) = 0 -> ignored;
+c             > 0 -> local;
+c Neutron heating of the non-fuel layers is not accounted for.
+c......................................................................
+
+*IFAL      - option flag for 3.5-MeV alpha transport; default =0;
+*IFP3      - option flag for 3-MeV proton transport; default =0;
+*IFP14     - option flag for 14-MeV proton transport; default =0;
+
+c......................................................................
+c <Energy transport by fast charged products>:
+c IFAL(IFP3,IFP14) = 0 -> ignored;
+c                  = 1 -> diffusion;
+c                  = 2 (or any other) -> local;
+=======================================================================
+
+COMMON/PAGEO/: geometry parameters:
+-----------------------------------------------------------------------
+*IGEO  =0 -> planar flow; =1 -> cylindrical flow; =2 -> spherical flow;
+             default = 0;
+ I1GEO =IGEO+1;
+ S1GEO=I1GEO;
+ CSURF=1.D0; IF(IGEO.GE.1) CSURF=2*IGEO*PINUM;
+=======================================================================
+
+COMMON/PASTRU/: target structural parameters:
+-----------------------------------------------------------------------
+ N          - total number of mesh cells in the target;
+ N1 =N+1;
+ N2 =N+2;
+*NZ         - total number of target layers (shells); default = 1;
+ NJZ(I)     - global sequential number of the first cell in layer I;
+*NZEVEN     - layer number from which the mesh construction begins;
+              default = 1;
+ NFU        - number of mesh cells in the central fuel zone;
+ AMSFU      - mass of fuel in the central fuel zone;
+*QZEVEN     - geometric progression factor for cell masses in layer
+              I=NZEVEN; recommended values : 0.93 < QZEVEN < 1.07;
+              default = 1.D0;
+=======================================================================
+
+COMMON/STARTC/: parameters of the initial target state:
+-----------------------------------------------------------------------
+!RZ0(I)     - left (inner) initial radius of target layer I;
+              values RZ0(1) through RZ0(NZ+1) should be assigned;
+!ROZ0(I)    - left (inner) initial density of target layer I;
+*ROZ01(I)   - right (outer) initial density of target layer I;
+              if not assigned, is set equal to ROZ0(I) in START;
+*BRO0PR(I)  - exponent value in the power-law initial density profile
+              rho(r)=ROZ0(I)+(ROZ01(I)-ROZ0(I))*
+              ((r-RZ0(I))/(RZ0(I+1)-RZ0(I)))**BRO0PR(I);
+              default value = 1.D0;
+*TE0(I)     - initial electron temperature in layer I; default=0.D0;
+*TI0(I)     - initial ion temperature in layer I; default=0.D0;
+*TR0(I)     - initial radiation temperature in layer I; default=0.D0;
+*XD0(I)     - initial fraction (by the number of atoms) of the D fuel
+              in layer I; default=0.D0;
+*XT0(I)     - initial fraction (by the number of atoms) of the T fuel
+              in layer I; default=0.D0;
+*XHE0(I)    - initial fraction (by the number of atoms) of the He^3 fuel
+              in layer I; default=0.D0;
+*XH0(I)     - initial fraction (by the number of atoms) of the H fuel
+              in layer I; default=0.D0;
+*XB0(I)     - initial fraction (by the number of atoms) of the B^11 fuel
+              in layer I; default=0.D0;
+ AMZ(I)     - mass in layer I;
+ EZ0(I)     - initial energy in layer I (for energy balance);
+!NMESH(I)   - number of mesh cells in layer I;
+*IFMFU0(I) =0 -> no fuel in layer I, no need to assign the values of
+                 XD0(I),XT0(I),XHE0(I),XH0(I),XB0(I);
+           =1 -> thermonuclear fuel in layer I, one has to assign at
+                 least some of XD0(I),XT0(I),XHE0(I),XH0(I),XB0(I);
+*HZ0        - initial value of the magnetic field; default = 0.D0;
+*DT0        - initial value of the time step DT; default = 1.D-8;
+=======================================================================
+
+COMMON/PADRIV/: parameters of the ion-beam drive:
+-----------------------------------------------------------------------
+*EIONB,
+*WDRIV,
+*TDRFIN,
+*TDRCAL,
+*NDRIV,
+*NDRAA
+=======================================================================
+
+COMMON/PASUB/: physical constants and material property parameters:
+-----------------------------------------------------------------------
+*UCBET,
+*ASBOL,
+*SMU1,
+*SMU2,
+*TMU1,
+*TMU2,
+*SIG,
+*SIGT
+*APRO(3),
+*ZPRO(3),
+*UPRO(3),
+*TPRO(3),
+*FITCAP(5)
+*NSUB(1:NNZ),
+*AMOL(1:NNZ),
+*XMOL(1:NNZ),
+*ZMOL(1:NNZ)
+*Z2MOL(1:NNZ),
+*SMOL(1:NNZ)
+=======================================================================
+
+COMMON/ACCUR/: parameters controlling the accuracy of hydro simulation:
+-----------------------------------------------------------------------
+*CZDT       - safety factor in the Courant constraint on the time
+              step DT; default = 0.5;
+*CZDTQ      - safety factor in constraint on the time step DT due to
+              the external heating; default = 0.2;
+*CZDTVT     - the not-to-be-exceeded relative change of temperatures and
+              density per one time step; the time step is called a "bad"
+              one when such a change exceeds 2*(1+CZDDT)*CZDTVT, and as
+              a "very bad" one when it exceeds 10*(1+CZDDT)*CZDTVT;
+              default = 0.2;
+*CZDDT      - maximum relative increase of DT allowed per one time step;
+              default = 0.2;
+*CZDRIV     - the upper limit on the sum of accumulated (over many time
+              steps) relative changes in V (specific volume) and TE,
+              above which the external heating rate QDRIV(J) must be
+              recalculated in DRIVE; only those cells J are considered
+              where QDRIV(J).GT.0.D0; default = 0.2;
+*CZVKIN     - the upper limit on the accumulated relative change of the
+              specific volume V beyond which all the transport
+              coefficients and the internal heating rates must be
+              recalculated in a given mesh cell J; default =0.1;
+*CZTKIN     - the upper limit on the accumulated relative change of
+              the sum of temperatures TE+TR beyond which all the
+              transport coefficients and the internal heating rates
+              must be recalculated in a given mesh cell J;
+              default = 0.03;
+=======================================================================
+
+COMMON/LIMITS/: various limiting constants:
+-----------------------------------------------------------------------
+ N1MAX      -  maximum allowed number of mesh nodes; N1MAX=NN+1;
+ NZMAX = NNZ (obsolete);
+*DTMIN      - minimum allowed value of DT; default = 1.D-18;
+*DTMAX      - maximum allowed value of DT; default = 1.D0;
+*EEMIN      - the "floor" value for the internal energy per unit mass;
+              default = 1.D-4;
+*TMIN       - the "floor" value for temperatures; default = 3.D-7;
+*HZMIN      - the "floor" value for the magnetic field; default=1.D-28;
+*FLLE       - flux limit factor for the electron heat conduction;
+              default = 0.5;
+*FLLI       - flux limit factor for the ion heat conduction;
+              default = 0.5;
+*FLLR       - flux limit factor for the radiation diffusion;
+              default = 0.5;
+*TBURN0     - ion temperature threshold for thermnuclear burn;
+              default = 0.1;
+*XBFLOO     - the "floor" (minimum positive) value for the initial
+              abundance of boron-11 and helium-3 isotopes in the fuel;
+              default = 1.D-9;
+
+=======================================================================
+=======================================================================
+
+
+C**********************************************************************
+C                 --- Comments to INIDART ---
+C......................................................................
+C  If ISTART.GE.1, a previous run is continued by using the initial   .
+C  data from file DEISA3; certain parameters can be overwritten later .
+C  TPRIN  is time for printout                                        .
+C  DTPRIN is time step for printout                                   .
+C  TFIN   is the time when to terminate the run                       .
+C  NTFIN  is the number of time steps after which to terminate the run.
+C......................................................................
+C......................................................................
+C  NSUB(I)  substance number in layer I;                              .
+C......................................................................
+C  EIONB    energy of beam ions driving the target (in GeV);          .
+C  WDRIV    power of the driving beam [in units TW*cm**(IGEO-2)];     .
+C  TDRFIN   time to stop the target drive;                            .
+C  TDRCAL   time to call DRIVE; incremented in DRIVE;                 .
+C......................................................................
+
+C......................................................................
+C  Physical constants:                                                .
+C   UCBET       is the speed of light;                                .
+C   ASBOL       the Stefan-Boltzmann radiation-density constant;      .
+C   SMU1,SMU2   the coefficients of linear and quadratic scalar       .
+C               artificial viscosities;                               .
+C   TMU1, TMU2  the coefficients of linear and quadratic tensor       .
+C               artificial viscosities; the Richtmyer viscosity       .
+C               is recovered with SMU2=2, SMU1=TMU1=TMU2=0;           .
+C   SIG, SIGT   right-end weights in the interpolation formulae for   .
+C               R**IGEO (scalar art. visc.) and R**(IGEO+2) (tensor   .
+C               art. visc.) at the centers of mesh cells; SIG > 0;    .
+C   APRO(I), UPRO(I) the atomic weight and birth velocity of the I-th .
+C                    species of charged fusion products;              .
+C   TPRO(I)     the fraction TPRO(I)/(TPRO(I)+TE) of the energy of    .
+C               the I-th charged product, deposited in plasma, goes   .
+C               to electrons; I=1: 3.5-MeV alphas, I=2: 3-MeV protons .
+C               I=3: 14-MeV protons;                                  .
+C   FITCAP(I)   fitting coefficient for electrical resistivity of     .
+C               substance # I at room temperature (enters L_ei)       .
+
+
+=======================================================================
+=======================================================================
+
+C  In the process of recalculating to a new time, different physical
+C  quantities may be stored in the same arrays of the c/blk /XXX/;
+C  as a consequence, the calling order of subroutines URSOS, DRIVE,
+C  KINBUR, STEP, EBALNC, and UPSLOI cannot be interchanged !!!
+C  The scheme of array usage in the c/blk /XXX/ is as follows:
+C  [ *  denotes "assign a value" (overwrite);  $  denotes "read out". ]
+C-----------------------------------------------------------------------
+C  principal array names:
+C        .  PE     EEV      US     EIT      QI     QSDT    QSDHE   WN2
+C        .     EET      QE      PI     EIV     QJL     QSDD    WN14
+C-----------------------------------------------------------------------
+C        .              EE                  EI      YI
+C  URSOS .  *   *   *   *   *   *   *   *   *       *
+C        .  |   |   |       |   |   |   |           |
+C-----------|---|---|-------|---|---|---|-----------|-------------------
+C        .  |   |   |       |   |   |   |           |
+C  DRIVE .  |   |   |       |   |   |   |           $
+C        .  |   |   |       |   |   |   |           |
+C-----------|---|---|-------|---|---|---|-----------|-------------------
+C        .  |   |   |   QE  |   |   |   |   QI      $
+C  KINBUR.  |   |   |   *   |   |   |   |   *   *  QSDT *   *   *   *
+C        .  |   |   |   |   |   |   |   |   |   |   *   |   |   |   |
+C-----------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---
+C        .  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+C  STEP  .  $   $   |   $   $   $   $   |   $   $   |   |   |   |   |
+C        .  |   |   |   |   |   |   |   |   |       |   |   |   |   |
+C-----------|---|---|---|---|---|---|---|---|-------|---|---|---|---|---
+C        .  |   |   |   |   |   |   |   |   |       |   |   |   |   |
+C  EBALNC.  |   |   |   |   |   |   |   |   |       $   $   $   $   $
+C        .  |   |   |   |   |   |   |   |   |       |   |   |
+C-----------|---|---|---|---|---|---|---|---|-------|---|---|-----------
+C  UPSLOI.  |   |   |   |   |   |   |   |   |       |   |   |
+C new XDT.  |   |   |   |   |   |   |   |   |       $   $   $
+C        .  |   |   |   |   |   |   |   |   |      QAL QP3 QP14
+C        .  |   |   |   |   |   |   |   |   |       *   *   *
+C...........|...|...|...|...|...|...|...|...|.......|...|...|...........
+C..new RU.  $   |   |   |   $   $   |   |   |       |   |   |
+C        . A0P      |   |SCAVIS B0P |   |   | TENVIS|   |   |   *   *
+C        .  *   |   *   |   *   *   |   *   *   *   |   |   |   $   $
+C        .  $   |   |   |   $   $   |   |   |   $   |   |   |
+C        .  *   |   |   |   VN DVDT |   |   |       |   |   |
+C        .  $   |   |   |   *   *   |   |   |       |   |   |
+C...............|...|...|...|...|...|...|...|.......|...|...|...........
+C new EAL. A1P  |   |   |   |   |   |   |   |       $   $   $
+C        .  *   |   |   *   $   $   |   |   *      B1P
+C        .  $   |   |   |   |   |   |   |   |       *
+C        .      |   |   |   |   |   |   |   |       $
+C...............|...|...|...|...|...|...|...|...........................
+C..new HZ. A3P  |   |   |   |   |   |   |   |  B3P
+C        .  *   |   |   *   $   |   |   |   |   *
+C        .  $   |   |   |   |   |   |   |   |   $
+C...............|...|...|...|...|...|...|...|...........................
+C new TTT.  *   |   $   $   |   $   |   |   $
+C        .  |   |   |   *   |   |   |   |   *
+C matrix .  $   $   $   $   $   $   $   $   $
+C progon . AA11    AA13            AA22    BB2     AA32    BB3
+C        .     AA12    BB1     AA21    AA23    AA31    AA33
+C        .  *   *   *   *       *   *   *   *   *   *   *   *
+C        .  $   $   $   $       $   $   $   $   $   $   $   $
+C-----------------------------------------------------------------------
+C        .  PE     EEV      US     EIT      QI     QSDT   QSDHE    WN2
+C        .     EET      QE      PI     EIV     QJL     QSDD   WN14
+C-----------------------------------------------------------------------

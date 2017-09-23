@@ -1,0 +1,10 @@
+      PARAMETER(NN=400,NNZ=8,PINUM=3.1415926535898D0,FLOOR=1.D-33)
+C  NN  is the maximum allowed number of mesh intervals;
+C  NNZ is the maximum allowed number of target layers (shells);
+C  NN and NNZ must be even numbers!
+C  FLOOR is the minimum positive number: all numbers X
+C        with ABS(X) < FLOOR are considered to be zeros.
+
+      PARAMETER(AFERFIT=0.4D0)
+c   AFERFIT is a fit parameter in the Basko's approximation to the 
+c   ideal Fermi-gas EOS.
